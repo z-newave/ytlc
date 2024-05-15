@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# ytlc - remove tracking info from YouTube links stored in XOrg's clipboard
+# (c) 2024 Zappi
+# 
+# `ytlc` is released under the GPLv3 licence. See file LICENSE for full 
+# licence details.
+#
+# Requires GNU Bash and XOrg.
+
+# First read whatever's stored in the clipboard
+read_clipboard () {
+    echo $(xclip -o)
+}
+
+# Remove everything in the clipboard's contents from &pp= onwards, inclusive
+clear_tracking () {
+    echo $(sed 's/&pp=.*$//' <<< "$1") 
+}
+
+# Write the result back to the clipboard
+write_clipboard () {
+    echo -n "$1" | xclip -i -selection CLIPBOARD
+}
+
+# Run read_clipboard and save the result
+link=$(read_clipboard)
+
+# Finally, check that the clipboard contains a YT link, filter it and save
+# result to clipboard
+if [[ "$link" =~ youtube.com ]]; then
+    write_clipboard $(clear_tracking "$link")
+fi
